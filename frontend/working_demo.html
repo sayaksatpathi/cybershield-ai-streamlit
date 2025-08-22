@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ CyberShield AI - Working Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cyber-blue: #00d4ff;
+            --cyber-green: #39ff14;
+            --cyber-orange: #ff6b35;
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(15, 15, 25, 0.95);
+            --text-light: #b8b8c8;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: grid-move 20s ease-in-out infinite;
+        }
+
+        @keyframes grid-move {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-25px, -25px); }
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .glitch-text {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--cyber-blue);
+            text-shadow: 
+                0 0 10px var(--cyber-blue),
+                0 0 20px var(--cyber-blue),
+                0 0 30px var(--cyber-blue);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px var(--cyber-blue), 0 0 20px var(--cyber-blue), 0 0 30px var(--cyber-blue); }
+            to { text-shadow: 0 0 20px var(--cyber-blue), 0 0 30px var(--cyber-blue), 0 0 40px var(--cyber-blue); }
+        }
+
+        .cyber-card {
+            background: var(--card-bg);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .cyber-btn {
+            background: linear-gradient(45deg, var(--cyber-blue), var(--cyber-green));
+            border: none;
+            color: #000;
+            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.5);
+            color: #000;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-light {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .operational { background: var(--cyber-green); }
+        .warning { background: var(--cyber-orange); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--cyber-blue);
+            color: white;
+        }
+
+        .form-control:focus {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: var(--cyber-green);
+            color: white;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        .analysis-result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--cyber-green);
+            background: rgba(57, 255, 20, 0.1);
+        }
+
+        .risk-high { border-color: var(--cyber-orange); background: rgba(255, 107, 53, 0.1); }
+        .risk-critical { border-color: #ff0000; background: rgba(255, 0, 0, 0.1); }
+
+        .nav-pills .nav-link {
+            background: transparent;
+            border: 2px solid var(--cyber-blue);
+            color: var(--cyber-blue);
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link:hover, .nav-pills .nav-link.active {
+            background: var(--cyber-blue);
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 212, 255, 0.3);
+            border-top: 4px solid var(--cyber-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <div class="container-fluid">
+        <div class="header">
+            <h1 class="glitch-text">🛡️ CYBERSHIELD AI</h1>
+            <p class="lead" style="color: var(--cyber-blue);">Advanced AI-Powered Financial Fraud Detection System</p>
+            <p style="color: var(--text-light);">Real-time Transaction Security Using Machine Learning</p>
+        </div>
+
+        <!-- Navigation -->
+        <ul class="nav nav-pills nav-fill justify-content-center mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard" type="button" role="tab">
+                    <i class="fas fa-shield-alt"></i> Dashboard
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="pill" data-bs-target="#analysis" type="button" role="tab">
+                    <i class="fas fa-search"></i> Fraud Analysis
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="batch-tab" data-bs-toggle="pill" data-bs-target="#batch" type="button" role="tab">
+                    <i class="fas fa-layer-group"></i> Batch Processing
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="monitoring-tab" data-bs-toggle="pill" data-bs-target="#monitoring" type="button" role="tab">
+                    <i class="fas fa-chart-line"></i> Live Monitoring
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="cyber-card">
+                            <h3><i class="fas fa-shield-alt"></i> System Status</h3>
+                            <div class="status-indicator mb-3">
+                                <span class="status-light operational"></span>
+                                <span>OPERATIONAL</span>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <h4 style="color: var(--cyber-green);" id="uptime">99.97%</h4>
+                                    <small>Uptime</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 style="color: var(--cyber-blue);" id="threats">2,847</h4>
+                                    <small>Threats Blocked</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 style="color: var(--cyber-orange);" id="accuracy">99.7%</h4>
+                                    <small>Accuracy</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="cyber-card">
+                            <h3><i class="fas fa-chart-bar"></i> Real-time Stats</h3>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h4 style="color: var(--cyber-green);" id="transactions">15,247</h4>
+                                    <small>Transactions Today</small>
+                                </div>
+                                <div class="col-6">
+                                    <h4 style="color: var(--cyber-orange);" id="fraudsBlocked">47</h4>
+                                    <small>Frauds Blocked</small>
+                                </div>
+                            </div>
+                            <div class="row text-center mt-3">
+                                <div class="col-6">
+                                    <h4 style="color: var(--cyber-blue);" id="responseTime">42ms</h4>
+                                    <small>Response Time</small>
+                                </div>
+                                <div class="col-6">
+                                    <h4 style="color: var(--cyber-green);" id="connections">156</h4>
+                                    <small>Active Connections</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Tab -->
+            <div class="tab-pane fade" id="analysis" role="tabpanel">
+                <div class="cyber-card">
+                    <h3><i class="fas fa-search"></i> Transaction Fraud Analysis</h3>
+                    <form id="fraudAnalysisForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Transaction Amount ($)</label>
+                                    <input type="number" class="form-control" id="amount" placeholder="Enter amount" step="0.01" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Merchant Category</label>
+                                    <select class="form-control" id="merchantCategory" required>
+                                        <option value="">Select category</option>
+                                        <option value="grocery">Grocery Store</option>
+                                        <option value="gas_station">Gas Station</option>
+                                        <option value="restaurant">Restaurant</option>
+                                        <option value="retail">Retail Store</option>
+                                        <option value="online">Online Purchase</option>
+                                        <option value="atm">ATM Withdrawal</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Transaction Hour (0-23)</label>
+                                    <input type="number" class="form-control" id="transactionHour" min="0" max="23" placeholder="Enter hour" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Day of Week</label>
+                                    <select class="form-control" id="dayOfWeek" required>
+                                        <option value="">Select day</option>
+                                        <option value="0">Monday</option>
+                                        <option value="1">Tuesday</option>
+                                        <option value="2">Wednesday</option>
+                                        <option value="3">Thursday</option>
+                                        <option value="4">Friday</option>
+                                        <option value="5">Saturday</option>
+                                        <option value="6">Sunday</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="isWeekend">
+                                    <label class="form-check-label" for="isWeekend">Weekend Transaction</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn cyber-btn">
+                            <i class="fas fa-search"></i> Analyze Transaction
+                        </button>
+                    </form>
+                    <div id="analysisResults"></div>
+                </div>
+            </div>
+
+            <!-- Batch Processing Tab -->
+            <div class="tab-pane fade" id="batch" role="tabpanel">
+                <div class="cyber-card">
+                    <h3><i class="fas fa-layer-group"></i> Batch Transaction Processing</h3>
+                    <div class="mb-3">
+                        <label class="form-label">Number of Transactions to Process</label>
+                        <input type="number" class="form-control" id="batchSize" min="10" max="1000" value="100" placeholder="Enter batch size">
+                    </div>
+                    <button type="button" class="btn cyber-btn" onclick="processBatch()">
+                        <i class="fas fa-play"></i> Process Batch
+                    </button>
+                    <div id="batchResults"></div>
+                </div>
+            </div>
+
+            <!-- Live Monitoring Tab -->
+            <div class="tab-pane fade" id="monitoring" role="tabpanel">
+                <div class="cyber-card">
+                    <h3><i class="fas fa-chart-line"></i> Live Transaction Monitoring</h3>
+                    <div class="d-flex gap-3 mb-3">
+                        <button type="button" class="btn cyber-btn" onclick="startMonitoring()">
+                            <i class="fas fa-play"></i> Start Monitoring
+                        </button>
+                        <button type="button" class="btn btn-outline-light" onclick="stopMonitoring()">
+                            <i class="fas fa-stop"></i> Stop Monitoring
+                        </button>
+                    </div>
+                    <div id="monitoringFeed" style="height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
+                        <p style="color: var(--text-light);">Click "Start Monitoring" to begin live transaction feed...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let monitoringInterval = null;
+        let transactionCounter = 0;
+
+        // Real-time stats update
+        function updateStats() {
+            document.getElementById('threats').textContent = (2847 + Math.floor(Math.random() * 5)).toLocaleString();
+            document.getElementById('transactions').textContent = (15247 + Math.floor(Math.random() * 100)).toLocaleString();
+            document.getElementById('fraudsBlocked').textContent = (47 + Math.floor(Math.random() * 3));
+            document.getElementById('responseTime').textContent = (40 + Math.floor(Math.random() * 20)) + 'ms';
+            document.getElementById('connections').textContent = (150 + Math.floor(Math.random() * 20));
+        }
+
+        // Fraud analysis form
+        document.getElementById('fraudAnalysisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('amount').value);
+            const merchantCategory = document.getElementById('merchantCategory').value;
+            const transactionHour = parseInt(document.getElementById('transactionHour').value);
+            const dayOfWeek = parseInt(document.getElementById('dayOfWeek').value);
+            const isWeekend = document.getElementById('isWeekend').checked;
+
+            // Show loading
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="text-center mt-4">
+                    <div class="loading"></div>
+                    <p style="margin-top: 15px; color: var(--cyber-blue);">Analyzing transaction...</p>
+                </div>
+            `;
+
+            // Simulate analysis
+            setTimeout(() => {
+                const result = analyzeTransaction(amount, merchantCategory, transactionHour, dayOfWeek, isWeekend);
+                displayAnalysisResult(result);
+            }, 2000);
+        });
+
+        function analyzeTransaction(amount, category, hour, dayOfWeek, isWeekend) {
+            // Simple fraud probability calculation
+            let fraudProb = 0;
+            
+            // Amount-based risk
+            if (amount > 1000) fraudProb += 0.3;
+            if (amount > 5000) fraudProb += 0.2;
+            
+            // Time-based risk
+            if (hour < 6 || hour > 22) fraudProb += 0.25;
+            
+            // Category-based risk
+            if (category === 'online' || category === 'atm') fraudProb += 0.15;
+            
+            // Weekend risk
+            if (isWeekend) fraudProb += 0.1;
+            
+            // Random factor
+            fraudProb += Math.random() * 0.3;
+            fraudProb = Math.min(fraudProb, 1.0);
+
+            const isHigh = fraudProb > 0.65;
+            const isCritical = fraudProb > 0.85;
+            
+            return {
+                fraudProbability: fraudProb,
+                isHigh: isHigh,
+                isCritical: isCritical,
+                riskLevel: isCritical ? 'CRITICAL' : isHigh ? 'HIGH' : fraudProb > 0.35 ? 'MEDIUM' : 'LOW',
+                confidence: 0.9
+            };
+        }
+
+        function displayAnalysisResult(result) {
+            const riskClass = result.isCritical ? 'risk-critical' : result.isHigh ? 'risk-high' : '';
+            const riskIcon = result.isCritical ? 'fas fa-exclamation-triangle' : result.isHigh ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="analysis-result ${riskClass}">
+                    <h4><i class="${riskIcon}"></i> Analysis Complete</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Fraud Probability:</strong> ${(result.fraudProbability * 100).toFixed(1)}%</p>
+                            <p><strong>Risk Level:</strong> <span style="color: ${result.isCritical ? '#ff0000' : result.isHigh ? 'var(--cyber-orange)' : 'var(--cyber-green)'}">${result.riskLevel}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>Recommendation:</strong> ${result.isCritical ? 'BLOCK TRANSACTION' : result.isHigh ? 'MANUAL REVIEW' : 'APPROVE'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function processBatch() {
+            const batchSize = parseInt(document.getElementById('batchSize').value) || 100;
+            
+            document.getElementById('batchResults').innerHTML = `
+                <div class="text-center mt-4">
+                    <div class="loading"></div>
+                    <p style="margin-top: 15px; color: var(--cyber-blue);">Processing ${batchSize} transactions...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const fraudCount = Math.floor(batchSize * (0.02 + Math.random() * 0.08)); // 2-10% fraud rate
+                const legitimateCount = batchSize - fraudCount;
+                const processingTime = (batchSize * 0.02 + Math.random() * 2).toFixed(2);
+                
+                document.getElementById('batchResults').innerHTML = `
+                    <div class="analysis-result mt-4">
+                        <h4><i class="fas fa-chart-bar"></i> Batch Processing Complete</h4>
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h5 style="color: var(--cyber-blue);">${batchSize}</h5>
+                                <small>Total Processed</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 style="color: var(--cyber-orange);">${fraudCount}</h5>
+                                <small>Fraudulent</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 style="color: var(--cyber-green);">${legitimateCount}</h5>
+                                <small>Legitimate</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 style="color: var(--cyber-blue);">${processingTime}s</h5>
+                                <small>Processing Time</small>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p><strong>Fraud Rate:</strong> ${((fraudCount / batchSize) * 100).toFixed(2)}%</p>
+                            <p><strong>Status:</strong> <span style="color: var(--cyber-green);">COMPLETED SUCCESSFULLY</span></p>
+                        </div>
+                    </div>
+                `;
+            }, 3000);
+        }
+
+        function startMonitoring() {
+            const feed = document.getElementById('monitoringFeed');
+            feed.innerHTML = '<p style="color: var(--cyber-green);"><i class="fas fa-play"></i> Live monitoring started...</p>';
+            
+            monitoringInterval = setInterval(() => {
+                transactionCounter++;
+                const amount = (Math.random() * 2000 + 10).toFixed(2);
+                const time = new Date().toLocaleTimeString();
+                const isFraud = Math.random() < 0.05; // 5% fraud rate
+                const riskLevel = isFraud ? ['HIGH', 'CRITICAL'][Math.floor(Math.random() * 2)] : ['LOW', 'MEDIUM'][Math.floor(Math.random() * 2)];
+                const status = isFraud ? 'BLOCKED' : 'APPROVED';
+                const statusColor = isFraud ? 'var(--cyber-orange)' : 'var(--cyber-green)';
+                
+                const entry = `
+                    <div style="margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; border-left: 3px solid ${statusColor};">
+                        <div style="display: flex; justify-content: between; align-items: center;">
+                            <span><strong>TXN-${String(transactionCounter).padStart(6, '0')}</strong> | $${amount} | ${time}</span>
+                            <span style="color: ${statusColor}; font-weight: bold; margin-left: auto;">${status}</span>
+                        </div>
+                        <small style="color: var(--text-light);">Risk: ${riskLevel} | Category: ${['Grocery', 'Online', 'Restaurant', 'Retail'][Math.floor(Math.random() * 4)]}</small>
+                    </div>
+                `;
+                
+                feed.insertAdjacentHTML('afterbegin', entry);
+                
+                // Keep only latest 20 entries
+                const entries = feed.children;
+                if (entries.length > 20) {
+                    feed.removeChild(entries[entries.length - 1]);
+                }
+            }, 2000);
+        }
+
+        function stopMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+                const feed = document.getElementById('monitoringFeed');
+                feed.insertAdjacentHTML('afterbegin', '<p style="color: var(--cyber-orange);"><i class="fas fa-stop"></i> Monitoring stopped.</p>');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🛡️ CyberShield AI Loaded Successfully');
+            
+            // Update stats every 5 seconds
+            setInterval(updateStats, 5000);
+            
+            // Initial stats update
+            updateStats();
+        });
+    </script>
+</body>
+</html>

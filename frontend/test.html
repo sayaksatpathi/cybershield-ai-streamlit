@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: #00d4ff;
+            padding: 20px;
+        }
+        .test-content {
+            background: rgba(15, 15, 25, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #00d4ff;
+            text-align: center;
+        }
+        .glow-text {
+            color: #39ff14;
+            text-shadow: 0 0 10px #39ff14;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        button {
+            background: linear-gradient(45deg, #00d4ff, #39ff14);
+            border: none;
+            color: #000;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-content">
+        <h1>🛡️ CyberShield AI Test Page</h1>
+        <div class="glow-text">System Status: ONLINE</div>
+        <p>This is a test page to verify the server is working properly.</p>
+        <button onclick="testFunction()">Test JavaScript</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function testFunction() {
+            document.getElementById('result').innerHTML = 
+                '<div style="color: #39ff14; margin-top: 20px;">✅ JavaScript is working!</div>';
+        }
+        
+        console.log('Test page loaded successfully');
+    </script>
+</body>
+</html>
+</content>
+</invoke>

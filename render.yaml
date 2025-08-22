@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: cybershield-ai
+    env: python
+    buildCommand: pip install -r requirements_production.txt
+    startCommand: streamlit run simple_model_trainer.py --server.port=$PORT --server.address=0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
