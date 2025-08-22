@@ -11,6 +11,9 @@ from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
+# Version info for cloud deployment sync
+__version__ = "2.0.1"  # Latest features with 1GB upload capability
+
 # Machine Learning imports
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
