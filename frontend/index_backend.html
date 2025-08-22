@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ CyberShield AI - Fraud Detection System (Backend Connected)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Animated Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="glitch-text" data-text="🛡️ CYBERSHIELD AI">
+                    🛡️ CYBERSHIELD AI
+                </h1>
+                <p class="subtitle cyber-text">Advanced AI-Powered Financial Fraud Detection System</p>
+                <p class="lead" style="color: var(--cyber-blue); font-weight: 600;">
+                    Backend Connected | 1GB Upload Support | Real-time ML Processing
+                </p>
+                
+                <!-- System Status -->
+                <div id="systemStatus" class="alert alert-info">
+                    🔄 Initializing system...
+                </div>
+                
+                <!-- Models Status -->
+                <div id="modelsStatus">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Checking models status...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="navigation-section">
+                <h4 class="modules-title">
+                    <i class="fas fa-layer-group"></i> CYBERSHIELD MODULES
+                </h4>
+                <div class="modules-grid">
+                    <button class="module-btn active" data-module="dataModule">
+                        <i class="fas fa-database"></i>
+                        <span>Data Management</span>
+                    </button>
+                    <button class="module-btn" data-module="predictionModule">
+                        <i class="fas fa-search"></i>
+                        <span>Fraud Prediction</span>
+                    </button>
+                    <button class="module-btn" data-module="analyticsModule">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </button>
+                    <button class="module-btn" data-module="monitoringModule">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Monitoring</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Management Module -->
+            <div id="dataModule" class="module-content" style="display: block;">
+                <div class="cyber-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-database"></i> Data Management & Model Training</h3>
+                        <p>Generate synthetic data or upload your own dataset (up to 1GB)</p>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <!-- Synthetic Data Generation -->
+                            <div class="col-md-6">
+                                <div class="card cyber-card h-100">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-magic"></i> Generate Synthetic Data</h5>
+                                        <p>Create realistic fraud detection training data with enhanced patterns</p>
+                                        <button id="generateDataBtn" class="btn btn-cyber-primary btn-lg w-100">
+                                            <i class="fas fa-cogs"></i> Generate Data & Train Models
+                                        </button>
+                                        <small class="text-muted mt-2 d-block">
+                                            Generates 10,000 transactions with 2% fraud rate
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- File Upload -->
+                            <div class="col-md-6">
+                                <div class="card cyber-card h-100">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-upload"></i> Upload Custom Dataset</h5>
+                                        <p>Upload your own CSV file with transaction data</p>
+                                        
+                                        <div class="upload-area">
+                                            <input type="file" id="datasetUpload" accept=".csv" class="form-control">
+                                            <div class="upload-info mt-2">
+                                                <small class="text-success">
+                                                    <i class="fas fa-check"></i> Supports up to 1GB files
+                                                </small><br>
+                                                <small class="text-info">
+                                                    Required: CSV with 'is_fraud' column
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Display -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div id="dataStats"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="modelResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Prediction Module -->
+            <div id="predictionModule" class="module-content" style="display: none;">
+                <div class="cyber-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-search"></i> Real-time Fraud Prediction</h3>
+                        <p>Analyze individual transactions for fraud risk</p>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card cyber-card">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-credit-card"></i> Transaction Details</h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Transaction Amount ($)</label>
+                                                <input type="number" id="predAmount" class="form-control" placeholder="Enter amount" step="0.01" min="0">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Hour of Day (0-23)</label>
+                                                <input type="number" id="predHour" class="form-control" placeholder="Enter hour" min="0" max="23">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Merchant Category</label>
+                                                <select id="predMerchant" class="form-select">
+                                                    <option value="1">Grocery</option>
+                                                    <option value="2">Gas Station</option>
+                                                    <option value="3">Restaurant</option>
+                                                    <option value="4">Retail</option>
+                                                    <option value="5">Online</option>
+                                                    <option value="6">ATM</option>
+                                                    <option value="7">Hotel</option>
+                                                    <option value="8">Entertainment</option>
+                                                    <option value="9">Healthcare</option>
+                                                    <option value="10">Travel</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Country Risk Score (0-1)</label>
+                                                <input type="number" id="predCountryRisk" class="form-control" placeholder="0.0 to 1.0" step="0.1" min="0" max="1">
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">Model Selection</label>
+                                                <select id="predModel" class="form-select">
+                                                    <option value="Random Forest">Random Forest</option>
+                                                    <option value="Gradient Boosting">Gradient Boosting</option>
+                                                    <option value="Logistic Regression">Logistic Regression</option>
+                                                    <option value="SVM">Support Vector Machine</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <button id="predictBtn" class="btn btn-cyber-primary btn-lg w-100">
+                                            <i class="fas fa-shield-alt"></i> Analyze Transaction
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div id="predictionResult">
+                                    <div class="card cyber-card">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                            <h5>Awaiting Transaction Data</h5>
+                                            <p class="text-muted">Enter transaction details and click "Analyze Transaction" to get fraud risk assessment</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Module -->
+            <div id="analyticsModule" class="module-content" style="display: none;">
+                <div class="cyber-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-chart-line"></i> System Analytics</h3>
+                        <p>Real-time monitoring and performance metrics</p>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
+                                    <div class="stat-value" id="totalTransactions">0</div>
+                                    <div class="stat-label">Total Transactions</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                                    <div class="stat-value text-danger" id="threatsDetected">0</div>
+                                    <div class="stat-label">Threats Detected</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                                    <div class="stat-value text-info" id="activeConnections">0</div>
+                                    <div class="stat-label">Active Connections</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                    <div class="stat-value text-success" id="systemUptime">99.97%</div>
+                                    <div class="stat-label">System Uptime</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring Module -->
+            <div id="monitoringModule" class="module-content" style="display: none;">
+                <div class="cyber-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-shield-alt"></i> Security Monitoring</h3>
+                        <p>Real-time threat detection and system status</p>
+                    </div>
+                    <div class="panel-body">
+                        <div class="card cyber-card">
+                            <div class="card-body">
+                                <h5><i class="fas fa-server"></i> Backend System Status</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="system-status">
+                                            <div class="status-item">
+                                                <span class="status-indicator status-online"></span>
+                                                <span>Backend API Server</span>
+                                            </div>
+                                            <div class="status-item">
+                                                <span class="status-indicator status-online"></span>
+                                                <span>Machine Learning Models</span>
+                                            </div>
+                                            <div class="status-item">
+                                                <span class="status-indicator status-online"></span>
+                                                <span>File Upload Service (1GB)</span>
+                                            </div>
+                                            <div class="status-item">
+                                                <span class="status-indicator status-online"></span>
+                                                <span>Real-time Prediction Engine</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6>Available Features</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-check text-success"></i> 1GB File Upload Support</li>
+                                                    <li><i class="fas fa-check text-success"></i> 4 ML Models (RF, GB, LR, SVM)</li>
+                                                    <li><i class="fas fa-check text-success"></i> Synthetic Data Generation</li>
+                                                    <li><i class="fas fa-check text-success"></i> Real-time Prediction API</li>
+                                                    <li><i class="fas fa-check text-success"></i> Custom Dataset Processing</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>&copy; 2025 CyberShield AI - Advanced Fraud Detection System | Backend Connected Version</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script_backend.js"></script>
+</body>
+</html>
