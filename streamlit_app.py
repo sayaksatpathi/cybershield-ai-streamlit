@@ -480,86 +480,85 @@ with tab1:
                     
                     if X.empty:
                         st.error("❌ No numeric features found for training.")
-                        return
-                    
-                    try:
-                        # Split data
-                        X_train, X_test, y_train, y_test = train_test_split(
-                            X, y, test_size=test_size, random_state=42, stratify=y
-                        )
-                        
-                        # Scale features
-                        scaler = StandardScaler()
-                        X_train_scaled = scaler.fit_transform(X_train)
-                        X_test_scaled = scaler.transform(X_test)
-                        
-                        # Train model
-                        with st.spinner(f"Training {algorithm} model..."):
-                            if algorithm == "Random Forest":
-                                model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
-                                model.fit(X_train, y_train)
-                            elif algorithm == "Gradient Boosting":
-                                model = GradientBoostingClassifier(random_state=42)
-                                model.fit(X_train, y_train)
-                            elif algorithm == "Logistic Regression":
-                                model = LogisticRegression(random_state=42, class_weight='balanced')
-                                model.fit(X_train_scaled, y_train)
-                            else:  # SVM
-                                model = SVC(probability=True, random_state=42, class_weight='balanced')
-                                model.fit(X_train_scaled, y_train)
-                        
-                        # Make predictions
-                        if algorithm in ["Logistic Regression", "SVM"]:
-                            y_pred = model.predict(X_test_scaled)
-                            y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
-                        else:
-                            y_pred = model.predict(X_test)
-                            y_pred_proba = model.predict_proba(X_test)[:, 1]
-                        
-                        # Calculate metrics
-                        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-                        
-                        accuracy = accuracy_score(y_test, y_pred)
-                        precision = precision_score(y_test, y_pred, zero_division=0)
-                        recall = recall_score(y_test, y_pred, zero_division=0)
-                        f1 = f1_score(y_test, y_pred, zero_division=0)
-                        auc = roc_auc_score(y_test, y_pred_proba)
-                        
-                        # Store results
-                        st.session_state['model'] = model
-                        st.session_state['scaler'] = scaler
-                        st.session_state['algorithm'] = algorithm
-                        st.session_state['feature_columns'] = X.columns.tolist()
-                        st.session_state['metrics'] = {
-                            'accuracy': accuracy,
-                            'precision': precision,
-                            'recall': recall,
-                            'f1': f1,
-                            'auc': auc
-                        }
-                        st.session_state['test_data'] = (X_test, y_test, y_pred, y_pred_proba)
-                        
-                        st.success(f"✅ {algorithm} model trained successfully!")
-                        
-                        # Display metrics
-                        col_a, col_b, col_c, col_d, col_e = st.columns(5)
-                        with col_a:
-                            st.metric("Accuracy", f"{accuracy:.3f}")
-                        with col_b:
-                            st.metric("Precision", f"{precision:.3f}")
-                        with col_c:
-                            st.metric("Recall", f"{recall:.3f}")
-                        with col_d:
-                            st.metric("F1-Score", f"{f1:.3f}")
-                        with col_e:
-                            st.metric("AUC", f"{auc:.3f}")
-                        
-                        # Show class distribution
-                        st.info(f"📊 Test set: {(y_test == 0).sum()} legitimate, {(y_test == 1).sum()} fraud | Predicted: {(y_pred == 0).sum()} legitimate, {(y_pred == 1).sum()} fraud")
-                        
-                    except Exception as e:
-                        st.error(f"❌ Training failed: {str(e)}")
-                        st.info("💡 This might be due to insufficient data or data format issues.")
+                    else:
+                        try:
+                            # Split data
+                            X_train, X_test, y_train, y_test = train_test_split(
+                                X, y, test_size=test_size, random_state=42, stratify=y
+                            )
+                            
+                            # Scale features
+                            scaler = StandardScaler()
+                            X_train_scaled = scaler.fit_transform(X_train)
+                            X_test_scaled = scaler.transform(X_test)
+                            
+                            # Train model
+                            with st.spinner(f"Training {algorithm} model..."):
+                                if algorithm == "Random Forest":
+                                    model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+                                    model.fit(X_train, y_train)
+                                elif algorithm == "Gradient Boosting":
+                                    model = GradientBoostingClassifier(random_state=42)
+                                    model.fit(X_train, y_train)
+                                elif algorithm == "Logistic Regression":
+                                    model = LogisticRegression(random_state=42, class_weight='balanced')
+                                    model.fit(X_train_scaled, y_train)
+                                else:  # SVM
+                                    model = SVC(probability=True, random_state=42, class_weight='balanced')
+                                    model.fit(X_train_scaled, y_train)
+                            
+                            # Make predictions
+                            if algorithm in ["Logistic Regression", "SVM"]:
+                                y_pred = model.predict(X_test_scaled)
+                                y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
+                            else:
+                                y_pred = model.predict(X_test)
+                                y_pred_proba = model.predict_proba(X_test)[:, 1]
+                            
+                            # Calculate metrics
+                            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+                            
+                            accuracy = accuracy_score(y_test, y_pred)
+                            precision = precision_score(y_test, y_pred, zero_division=0)
+                            recall = recall_score(y_test, y_pred, zero_division=0)
+                            f1 = f1_score(y_test, y_pred, zero_division=0)
+                            auc = roc_auc_score(y_test, y_pred_proba)
+                            
+                            # Store results
+                            st.session_state['model'] = model
+                            st.session_state['scaler'] = scaler
+                            st.session_state['algorithm'] = algorithm
+                            st.session_state['feature_columns'] = X.columns.tolist()
+                            st.session_state['metrics'] = {
+                                'accuracy': accuracy,
+                                'precision': precision,
+                                'recall': recall,
+                                'f1': f1,
+                                'auc': auc
+                            }
+                            st.session_state['test_data'] = (X_test, y_test, y_pred, y_pred_proba)
+                            
+                            st.success(f"✅ {algorithm} model trained successfully!")
+                            
+                            # Display metrics
+                            col_a, col_b, col_c, col_d, col_e = st.columns(5)
+                            with col_a:
+                                st.metric("Accuracy", f"{accuracy:.3f}")
+                            with col_b:
+                                st.metric("Precision", f"{precision:.3f}")
+                            with col_c:
+                                st.metric("Recall", f"{recall:.3f}")
+                            with col_d:
+                                st.metric("F1-Score", f"{f1:.3f}")
+                            with col_e:
+                                st.metric("AUC", f"{auc:.3f}")
+                            
+                            # Show class distribution
+                            st.info(f"📊 Test set: {(y_test == 0).sum()} legitimate, {(y_test == 1).sum()} fraud | Predicted: {(y_pred == 0).sum()} legitimate, {(y_pred == 1).sum()} fraud")
+                            
+                        except Exception as e:
+                            st.error(f"❌ Training failed: {str(e)}")
+                            st.info("💡 This might be due to insufficient data or data format issues.")
         else:
             st.info("Please generate or upload a dataset first!")
 
