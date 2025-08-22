@@ -169,21 +169,49 @@ with tab1:
             with st.spinner("Generating transaction data..."):
                 df = generate_transaction_data(n_transactions)
                 st.session_state['dataset'] = df
-            st.success(f"✅ Generated {len(df)} transactions with {df['is_fraud'].sum()} fraudulent cases")
             
             # Display dataset info
+            fraud_count = df['is_fraud'].sum()
+            fraud_rate = df['is_fraud'].mean()
+            
+            st.success(f"✅ Generated {len(df)} transactions with {fraud_count} fraudulent cases ({fraud_rate:.1%} fraud rate)")
+            
             col_a, col_b, col_c = st.columns(3)
             with col_a:
                 st.metric("Total Transactions", len(df))
             with col_b:
-                st.metric("Fraud Cases", df['is_fraud'].sum())
+                st.metric("Fraud Cases", fraud_count)
             with col_c:
-                st.metric("Fraud Rate", f"{df['is_fraud'].mean():.2%}")
+                st.metric("Fraud Rate", f"{fraud_rate:.2%}")
+            
+            # Show fraud distribution
+            if fraud_count > 0:
+                st.subheader("Fraud Pattern Analysis")
+                fraud_data = df[df['is_fraud'] == 1]
+                
+                col_x, col_y = st.columns(2)
+                with col_x:
+                    fig = px.histogram(fraud_data, x='transaction_amount', 
+                                     title='Fraud Transaction Amounts',
+                                     color_discrete_sequence=['red'])
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                with col_y:
+                    fig = px.histogram(fraud_data, x='transaction_hour', 
+                                     title='Fraud by Hour of Day',
+                                     color_discrete_sequence=['red'])
+                    st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.subheader("Model Training")
         
         if 'dataset' in st.session_state:
+            df = st.session_state['dataset']
+            fraud_count = df['is_fraud'].sum()
+            
+            if fraud_count < 10:
+                st.warning(f"⚠️ Only {fraud_count} fraud cases detected. Consider generating a larger dataset for better training.")
+            
             algorithm = st.selectbox(
                 "Select Algorithm",
                 ["Random Forest", "Gradient Boosting", "Logistic Regression", "SVM"]
@@ -192,81 +220,85 @@ with tab1:
             test_size = st.slider("Test set size", 0.1, 0.5, 0.2, step=0.05)
             
             if st.button("🚀 Train Model", type="primary"):
-                df = st.session_state['dataset']
-                
-                # Prepare features and target
-                X = df.drop(['is_fraud'], axis=1)
-                y = df['is_fraud']
-                
-                # Split data
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=test_size, random_state=42, stratify=y
-                )
-                
-                # Scale features
-                scaler = StandardScaler()
-                X_train_scaled = scaler.fit_transform(X_train)
-                X_test_scaled = scaler.transform(X_test)
-                
-                # Train model
-                with st.spinner(f"Training {algorithm} model..."):
-                    if algorithm == "Random Forest":
-                        model = RandomForestClassifier(n_estimators=100, random_state=42)
-                        model.fit(X_train, y_train)
-                    elif algorithm == "Gradient Boosting":
-                        model = GradientBoostingClassifier(random_state=42)
-                        model.fit(X_train, y_train)
-                    elif algorithm == "Logistic Regression":
-                        model = LogisticRegression(random_state=42)
-                        model.fit(X_train_scaled, y_train)
-                    else:  # SVM
-                        model = SVC(probability=True, random_state=42)
-                        model.fit(X_train_scaled, y_train)
-                
-                # Make predictions
-                if algorithm in ["Logistic Regression", "SVM"]:
-                    y_pred = model.predict(X_test_scaled)
-                    y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
+                if fraud_count < 5:
+                    st.error("❌ Not enough fraud cases to train. Please generate a larger dataset.")
                 else:
-                    y_pred = model.predict(X_test)
-                    y_pred_proba = model.predict_proba(X_test)[:, 1]
-                
-                # Calculate metrics
-                from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-                
-                accuracy = accuracy_score(y_test, y_pred)
-                precision = precision_score(y_test, y_pred)
-                recall = recall_score(y_test, y_pred)
-                f1 = f1_score(y_test, y_pred)
-                auc = roc_auc_score(y_test, y_pred_proba)
-                
-                # Store results
-                st.session_state['model'] = model
-                st.session_state['scaler'] = scaler
-                st.session_state['algorithm'] = algorithm
-                st.session_state['metrics'] = {
-                    'accuracy': accuracy,
-                    'precision': precision,
-                    'recall': recall,
-                    'f1': f1,
-                    'auc': auc
-                }
-                st.session_state['test_data'] = (X_test, y_test, y_pred, y_pred_proba)
-                
-                st.success(f"✅ {algorithm} model trained successfully!")
-                
-                # Display metrics
-                col_a, col_b, col_c, col_d, col_e = st.columns(5)
-                with col_a:
-                    st.metric("Accuracy", f"{accuracy:.3f}")
-                with col_b:
-                    st.metric("Precision", f"{precision:.3f}")
-                with col_c:
-                    st.metric("Recall", f"{recall:.3f}")
-                with col_d:
-                    st.metric("F1-Score", f"{f1:.3f}")
-                with col_e:
-                    st.metric("AUC", f"{auc:.3f}")
+                    # Prepare features and target
+                    X = df.drop(['is_fraud'], axis=1)
+                    y = df['is_fraud']
+                    
+                    # Split data
+                    X_train, X_test, y_train, y_test = train_test_split(
+                        X, y, test_size=test_size, random_state=42, stratify=y
+                    )
+                    
+                    # Scale features
+                    scaler = StandardScaler()
+                    X_train_scaled = scaler.fit_transform(X_train)
+                    X_test_scaled = scaler.transform(X_test)
+                    
+                    # Train model
+                    with st.spinner(f"Training {algorithm} model..."):
+                        if algorithm == "Random Forest":
+                            model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+                            model.fit(X_train, y_train)
+                        elif algorithm == "Gradient Boosting":
+                            model = GradientBoostingClassifier(random_state=42)
+                            model.fit(X_train, y_train)
+                        elif algorithm == "Logistic Regression":
+                            model = LogisticRegression(random_state=42, class_weight='balanced')
+                            model.fit(X_train_scaled, y_train)
+                        else:  # SVM
+                            model = SVC(probability=True, random_state=42, class_weight='balanced')
+                            model.fit(X_train_scaled, y_train)
+                    
+                    # Make predictions
+                    if algorithm in ["Logistic Regression", "SVM"]:
+                        y_pred = model.predict(X_test_scaled)
+                        y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
+                    else:
+                        y_pred = model.predict(X_test)
+                        y_pred_proba = model.predict_proba(X_test)[:, 1]
+                    
+                    # Calculate metrics
+                    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+                    
+                    accuracy = accuracy_score(y_test, y_pred)
+                    precision = precision_score(y_test, y_pred, zero_division=0)
+                    recall = recall_score(y_test, y_pred, zero_division=0)
+                    f1 = f1_score(y_test, y_pred, zero_division=0)
+                    auc = roc_auc_score(y_test, y_pred_proba)
+                    
+                    # Store results
+                    st.session_state['model'] = model
+                    st.session_state['scaler'] = scaler
+                    st.session_state['algorithm'] = algorithm
+                    st.session_state['metrics'] = {
+                        'accuracy': accuracy,
+                        'precision': precision,
+                        'recall': recall,
+                        'f1': f1,
+                        'auc': auc
+                    }
+                    st.session_state['test_data'] = (X_test, y_test, y_pred, y_pred_proba)
+                    
+                    st.success(f"✅ {algorithm} model trained successfully!")
+                    
+                    # Display metrics
+                    col_a, col_b, col_c, col_d, col_e = st.columns(5)
+                    with col_a:
+                        st.metric("Accuracy", f"{accuracy:.3f}")
+                    with col_b:
+                        st.metric("Precision", f"{precision:.3f}")
+                    with col_c:
+                        st.metric("Recall", f"{recall:.3f}")
+                    with col_d:
+                        st.metric("F1-Score", f"{f1:.3f}")
+                    with col_e:
+                        st.metric("AUC", f"{auc:.3f}")
+                    
+                    # Show class distribution
+                    st.info(f"📊 Test set: {(y_test == 0).sum()} legitimate, {(y_test == 1).sum()} fraud | Predicted: {(y_pred == 0).sum()} legitimate, {(y_pred == 1).sum()} fraud")
         else:
             st.info("Please generate a dataset first!")
 
@@ -423,6 +455,13 @@ with tab3:
                               y=['Legitimate', 'Fraud'])
                 fig.update_layout(title='Confusion Matrix', height=400)
                 st.plotly_chart(fig, use_container_width=True)
+                
+                # Show detailed metrics
+                st.subheader("Detailed Analysis")
+                st.write(f"**True Negatives (Legitimate → Legitimate):** {cm[0,0]}")
+                st.write(f"**False Positives (Legitimate → Fraud):** {cm[0,1]}")
+                st.write(f"**False Negatives (Fraud → Legitimate):** {cm[1,0]}")
+                st.write(f"**True Positives (Fraud → Fraud):** {cm[1,1]}")
     else:
         st.info("Please train a model first to view analytics!")
 
