@@ -14,6 +14,14 @@ warnings.filterwarnings('ignore')
 # Version info for cloud deployment sync
 __version__ = "2.1.0"  # Latest features with 1GB upload capability - FORCE UPDATE Aug 23, 2025
 
+# Configure Streamlit for large file uploads
+import streamlit.web.cli as stcli
+import sys
+
+# Force set max upload size programmatically
+if hasattr(st.config, '_config'):
+    st.config._config['server']['maxUploadSize'] = 1024
+
 # Machine Learning imports
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -253,12 +261,15 @@ with tab1:
             # Prominent 1GB notice
             st.success("🚀 **NEW**: Now supports file uploads up to **1GB (1024MB)**! Perfect for enterprise datasets.")
             
+            # Streamlit limitation notice
+            st.warning("⚠️ **Note**: If you see '200MB limit' below, this is a Streamlit Cloud limitation. Local deployment supports full 1GB. For files >200MB, please run locally or contact support for enterprise cloud solutions.")
+            
             # File upload with drag and drop
             st.markdown("""
             <div class="upload-box">
                 <h3>📁 Drag and drop your CSV file here</h3>
                 <p>Or click to browse files</p>
-                <p><strong>Maximum file size: 1GB (1024MB)</strong></p>
+                <p><strong>Configured for: 1GB (1024MB) | Cloud may show 200MB due to platform limits</strong></p>
             </div>
             """, unsafe_allow_html=True)
             
