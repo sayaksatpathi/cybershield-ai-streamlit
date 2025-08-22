@@ -35,7 +35,7 @@ Once processed, you can:
 ### CSV Requirements:
 - **File extension**: `.csv`
 - **Encoding**: UTF-8 (recommended)
-- **Size limit**: Up to 200MB
+- **Size limit**: Up to 1GB (1024MB)
 - **Headers**: First row should contain column names
 
 ### Data Requirements:
@@ -114,7 +114,7 @@ The system performs automatic validation:
 ### Common Issues:
 
 **File won't upload:**
-- Check file size (<200MB)
+- Check file size (<1GB)
 - Ensure .csv extension
 - Verify UTF-8 encoding
 

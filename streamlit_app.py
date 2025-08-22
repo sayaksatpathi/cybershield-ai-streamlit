@@ -156,7 +156,9 @@ def validate_uploaded_data(df):
     
     # Check for minimum rows
     if len(df) < 100:
-        issues.append(f"Dataset too small ({len(df)} rows). Minimum 100 rows recommended.")
+        issues.append(f"Dataset too small ({len(df):,} rows). Minimum 100 rows recommended.")
+    elif len(df) > 1000000:  # 1 million rows
+        suggestions.append(f"Large dataset detected ({len(df):,} rows). Consider sampling for faster processing.")
     
     # Check for fraud column
     fraud_cols = [col for col in df.columns if 'fraud' in col.lower() or 'label' in col.lower()]
@@ -256,15 +258,28 @@ with tab1:
             uploaded_file = st.file_uploader(
                 "Choose a CSV file", 
                 type=['csv'],
-                help="Upload a CSV file with transaction data and fraud indicators."
+                help="Upload a CSV file with transaction data and fraud indicators. Maximum file size: 1GB"
             )
             
             if uploaded_file is not None:
                 try:
-                    # Read the uploaded file
-                    df = pd.read_csv(uploaded_file)
+                    # Show file info
+                    file_size_mb = uploaded_file.size / (1024 * 1024)
+                    st.info(f"📁 File: {uploaded_file.name} ({file_size_mb:.1f} MB)")
                     
-                    st.success(f"✅ Successfully loaded {len(df)} transactions from {uploaded_file.name}")
+                    # Read the uploaded file with progress for large files
+                    if file_size_mb > 50:  # Show progress for files larger than 50MB
+                        with st.spinner(f"Loading large file ({file_size_mb:.1f} MB)... This may take a moment."):
+                            df = pd.read_csv(uploaded_file)
+                    else:
+                        df = pd.read_csv(uploaded_file)
+                    
+                    st.success(f"✅ Successfully loaded {len(df):,} transactions from {uploaded_file.name}")
+                    
+                    # Memory usage info for large datasets
+                    if len(df) > 100000:
+                        memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 * 1024)
+                        st.info(f"💾 Dataset memory usage: {memory_usage_mb:.1f} MB")
                     
                     # Validate the data
                     issues, suggestions = validate_uploaded_data(df)
@@ -287,7 +302,11 @@ with tab1:
                     with col_b:
                         st.metric("Total Columns", len(df.columns))
                     with col_c:
-                        st.metric("File Size", f"{uploaded_file.size / 1024:.1f} KB")
+                        file_size_mb = uploaded_file.size / (1024 * 1024)
+                        if file_size_mb > 1:
+                            st.metric("File Size", f"{file_size_mb:.1f} MB")
+                        else:
+                            st.metric("File Size", f"{uploaded_file.size / 1024:.1f} KB")
                     
                     # Show column information
                     st.subheader("📋 Column Information")
@@ -348,6 +367,40 @@ with tab1:
                                 
                                 # Handle missing values
                                 df_processed = df_processed.fillna(df_processed.mean())
+                                
+                                # Large dataset optimization
+                                if len(df_processed) > 100000:
+                                    st.warning("⚠️ Large dataset detected! Consider using a sample for faster training.")
+                                    
+                                    sample_option = st.radio(
+                                        "Choose processing option:",
+                                        ["Use full dataset", "Use random sample", "Use stratified sample"],
+                                        index=1,
+                                        help="Random sample maintains distribution, stratified sample ensures fraud ratio is preserved"
+                                    )
+                                    
+                                    if sample_option != "Use full dataset":
+                                        sample_size = st.slider(
+                                            "Sample size:",
+                                            min_value=10000,
+                                            max_value=min(len(df_processed), 500000),
+                                            value=50000,
+                                            step=5000,
+                                            help="Larger samples provide better accuracy but take longer to train"
+                                        )
+                                        
+                                        if sample_option == "Use random sample":
+                                            df_processed = df_processed.sample(n=sample_size, random_state=42)
+                                        else:  # Stratified sample
+                                            from sklearn.model_selection import train_test_split
+                                            df_processed, _ = train_test_split(
+                                                df_processed, 
+                                                test_size=1-(sample_size/len(df_processed)),
+                                                stratify=df_processed['is_fraud'],
+                                                random_state=42
+                                            )
+                                        
+                                        st.info(f"✅ Using {len(df_processed):,} rows from your dataset")
                                 
                                 # Store processed dataset
                                 st.session_state['dataset'] = df_processed
@@ -427,6 +480,8 @@ with tab1:
                 st.write("Your CSV file should contain:")
                 st.write("• **Transaction features** (amount, time, account info, etc.)")
                 st.write("• **Fraud indicator column** with values indicating fraud vs legitimate")
+                st.write("• **Maximum file size**: 1GB (1024 MB)")
+                st.write("• **Recommended size**: 100,000+ transactions for best results")
                 
                 # Example data format
                 example_data = pd.DataFrame({
