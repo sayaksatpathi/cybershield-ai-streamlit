@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Version info for cloud deployment sync
-__version__ = "2.0.1"  # Latest features with 1GB upload capability
+__version__ = "2.1.0"  # Latest features with 1GB upload capability - FORCE UPDATE Aug 23, 2025
 
 # Machine Learning imports
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -250,18 +250,22 @@ with tab1:
         else:  # Upload Dataset
             st.subheader("📤 Upload Your Dataset")
             
+            # Prominent 1GB notice
+            st.success("🚀 **NEW**: Now supports file uploads up to **1GB (1024MB)**! Perfect for enterprise datasets.")
+            
             # File upload with drag and drop
             st.markdown("""
             <div class="upload-box">
                 <h3>📁 Drag and drop your CSV file here</h3>
                 <p>Or click to browse files</p>
+                <p><strong>Maximum file size: 1GB (1024MB)</strong></p>
             </div>
             """, unsafe_allow_html=True)
             
             uploaded_file = st.file_uploader(
                 "Choose a CSV file", 
                 type=['csv'],
-                help="Upload a CSV file with transaction data and fraud indicators. Maximum file size: 1GB"
+                help="📁 Upload CSV file with transaction data and fraud indicators. 🚀 Maximum file size: 1GB (1024MB)"
             )
             
             if uploaded_file is not None:
