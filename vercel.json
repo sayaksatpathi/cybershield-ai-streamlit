@@ -1,23 +1,25 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "frontend/index.html",
-      "use": "@vercel/static"
+      "src": "simple_backend.py",
+      "use": "@vercel/python"
     },
     {
-      "src": "api/predict.py",
-      "use": "@vercel/python"
+      "src": "frontend/cybershield_working.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/predict",
-      "dest": "/api/predict.py"
+      "src": "/api/(.*)",
+      "dest": "/simple_backend.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/frontend/cybershield_working.html"
     }
-  ]
+  ],
+  "env": {
+    "FLASK_ENV": "production"
+  }
 }
