@@ -29,6 +29,8 @@ jobs:
   deploy:
     name: Deploy (Render or Railway)
     needs: test
+    # Only run deploy job when at least one deployment secret is present
+    if: ${{ secrets.RENDER_API_KEY != '' || secrets.RAILWAY_API_KEY != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
