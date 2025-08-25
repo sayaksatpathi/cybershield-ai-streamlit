@@ -552,9 +552,31 @@
     <script>
         // Global variables
         // 🚀 NETLIFY FULL-STACK INTEGRATION
-        // Both frontend and backend hosted on Netlify!
+        // Both frontend and backend hosted on Netlify by default.
         const STREAMLIT_URL = 'https://cybershield-ai-app-vmbevtd5fcdrjfexcthga5.streamlit.app';
-        const API_BASE = 'https://rad-donut-a8e264.netlify.app/api';  // Netlify Functions API
+
+        // API_BASE is loaded from `frontend/api_base.txt` at runtime when present.
+        // This lets you set the backend URL (for example a Render service URL) without
+        // committing secrets or API keys into the repository. The file should contain
+        // the full base URL including the `/api` suffix, for example:
+        // https://cybershield-backend.onrender.com/api
+        let API_BASE = 'https://rad-donut-a8e264.netlify.app/api'; // default (Netlify)
+
+        (async function loadApiBaseFile(){
+            try {
+                const resp = await fetch('./api_base.txt', { cache: 'no-store' });
+                if (resp.ok) {
+                    const text = (await resp.text()).trim();
+                    if (text) {
+                        API_BASE = text;
+                        console.log('API_BASE loaded from api_base.txt:', API_BASE);
+                    }
+                }
+            } catch (err) {
+                // silently ignore and continue using default API_BASE
+                console.debug('api_base.txt not found or failed to load; using default API_BASE');
+            }
+        })();
         
         // 🔧 For local development, uncomment the line below:
         // const API_BASE = 'http://localhost:5000/api';
