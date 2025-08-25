@@ -571,6 +571,18 @@
             checkModelStatus();
         });
 
+        // Demo fallback: if backend is unreachable, the frontend will switch to a local demo mode
+        let USE_DEMO = false;
+        const DEMO_DATA = {
+            health: { status: 'operational (demo)', version: '1.0-demo', features: { max_upload_size: '1GB', models_trained: true } },
+            models: { trained: true, available_models: ['Random Forest','Gradient Boosting','Logistic Regression'], total_features: 12 },
+            model_results: {
+                'Random Forest': { auc: 0.95, precision: 0.92, recall: 0.91, f1_score: 0.915, accuracy: 0.93 },
+                'Gradient Boosting': { auc: 0.96, precision: 0.93, recall: 0.92, f1_score: 0.925, accuracy: 0.94 },
+                'Logistic Regression': { auc: 0.88, precision: 0.85, recall: 0.82, f1_score: 0.835, accuracy: 0.86 }
+            }
+        };
+
         // Setup all event listeners
         function setupEventListeners() {
             // File input change
@@ -650,15 +662,26 @@
                     </div>
                 `;
             } catch (error) {
-                document.getElementById('backendStatus').className = 'status-indicator status-offline me-2';
-                document.getElementById('systemStatusText').innerHTML = '❌ Backend Offline';
-                
+                // If backend request fails, enable demo fallback so the UI remains usable
+                console.warn('Backend health check failed, enabling demo mode:', error.message);
+                USE_DEMO = true;
+
+                document.getElementById('backendStatus').className = 'status-indicator status-online me-2';
+                document.getElementById('systemStatusText').innerHTML = '⚠️ Backend Unavailable — Demo Mode';
+
+                const data = DEMO_DATA.health;
                 document.getElementById('backendInfo').innerHTML = `
-                    <div class="alert alert-cyber-error">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Backend Offline</h6>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                        <p><strong>Solution:</strong> Start backend server:</p>
-                        <code>cd fraud-detection-streamlit && python backend_api.py</code>
+                    <div class="alert alert-cyber-info">
+                        <h6><i class="fas fa-tools"></i> Running in Demo Mode</h6>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Version:</strong> ${data.version}</p>
+                        <p><strong>Max Upload:</strong> ${data.features.max_upload_size}</p>
+                        <p><strong>Models Trained:</strong> ${data.features.models_trained ? 'Yes' : 'No'}</p>
+                        <small>Last checked: ${new Date().toLocaleTimeString()}</small>
+                    </div>
+                    <div class="alert alert-cyber-info">
+                        <p>The app is operating with local demo data because the backend endpoint <code>${API_BASE}</code> is unreachable.</p>
+                        <p>If you want real backend connectivity, deploy or start the backend and update <code>API_BASE</code> in the frontend.</p>
                     </div>
                 `;
             }
@@ -682,14 +705,44 @@
                     </div>
                 `;
             } catch (error) {
-                document.getElementById('modelStatus').innerHTML = `
-                    <div class="alert alert-cyber-error">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Model Check Failed</h6>
-                        <p>${error.message}</p>
-                    </div>
-                `;
+                console.warn('Model status check failed:', error.message);
+                if (USE_DEMO) {
+                    const data = DEMO_DATA.models;
+                    document.getElementById('modelStatus').innerHTML = `
+                        <div class="alert alert-cyber-info">
+                            <h6><i class="fas fa-robot"></i> Model Status (Demo)</h6>
+                            <p><strong>Trained:</strong> ${data.trained ? 'Yes' : 'No'}</p>
+                            <p><strong>Available Models:</strong> ${data.available_models.length}</p>
+                            <p><strong>Features:</strong> ${data.total_features}</p>
+                            <ul class="mb-0">
+                                ${data.available_models.map(model => `<li>${model}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('modelStatus').innerHTML = `
+                        <div class="alert alert-cyber-error">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Model Check Failed</h6>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
             }
         }
+
+        // Helper: produce a demo prediction when backend isn't available
+        function demoPredict(transactionData, selectedModel) {
+            const baseProb = Math.min(0.95, Math.random() * 0.4 + (transactionData.amount > 1000 ? 0.4 : 0.1));
+            const isFraud = baseProb > 0.6;
+            return {
+                success: true,
+                prediction: {
+                    fraud_probability: baseProb,
+                    risk_level: baseProb > 0.8 ? 'HIGH' : (baseProb > 0.5 ? 'MEDIUM' : 'LOW'),
+                    is_fraud_predicted: isFraud
+                }
+            };
+    }
 
         // Generate Synthetic Data
         async function generateData() {
@@ -752,8 +805,48 @@
                     showNotification('error', data.message);
                 }
             } catch (error) {
-                showError('dataResults', `Error: ${error.message}`);
-                showNotification('error', `Error: ${error.message}`);
+                console.warn('generateData failed:', error.message);
+                if (USE_DEMO) {
+                    // Use demo model results to simulate training
+                    const data = {
+                        success: true,
+                        data_stats: { total_transactions: numTransactions, fraud_count: Math.floor(numTransactions * 0.03), fraud_rate: 0.03 },
+                        model_results: DEMO_DATA.model_results
+                    };
+
+                    modelsData = data.model_results;
+                    document.getElementById('dataResults').innerHTML = `
+                        <div class="cyber-panel">
+                            <div class="alert alert-cyber-success">
+                                <h5><i class="fas fa-check-circle"></i> (Demo) Data Generated Successfully!</h5>
+                                <p><strong>Total Transactions:</strong> ${data.data_stats.total_transactions.toLocaleString()}</p>
+                                <p><strong>Fraud Cases:</strong> ${data.data_stats.fraud_count.toLocaleString()}</p>
+                                <p><strong>Fraud Rate:</strong> ${(data.data_stats.fraud_rate * 100).toFixed(2)}%</p>
+                            </div>
+                            <h5>Model Performance (Demo)</h5>
+                            <div class="row">
+                                ${Object.entries(data.model_results).map(([model, metrics]) => `
+                                    <div class="col-md-6">
+                                        <div class="model-card">
+                                            <h6>${model}</h6>
+                                            <p><strong>AUC:</strong> ${(metrics.auc * 100).toFixed(1)}%</p>
+                                            <p><strong>Precision:</strong> ${(metrics.precision * 100).toFixed(1)}%</p>
+                                            <p><strong>Recall:</strong> ${(metrics.recall * 100).toFixed(1)}%</p>
+                                            <p><strong>F1-Score:</strong> ${(metrics.f1_score * 100).toFixed(1)}%</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    updateModelMetrics(data.model_results);
+                    checkModelStatus();
+                    showNotification('success', 'Models trained successfully (demo)!');
+                } else {
+                    showError('dataResults', `Error: ${error.message}`);
+                    showNotification('error', `Error: ${error.message}`);
+                }
             } finally {
                 isGenerating = false;
                 generateBtn.disabled = false;
@@ -892,8 +985,51 @@
                     showError('dataResults', 'Upload was cancelled due to timeout');
                     showNotification('error', 'Upload timed out. Please try with a smaller file.');
                 } else if (error.message.includes('Failed to fetch') || error.message.includes('fetch')) {
-                    showError('dataResults', 'Backend server is not running or not accessible. Please start the backend server.');
-                    showNotification('error', 'Backend server connection failed. Please ensure the backend server is running on port 5000.');
+                    if (USE_DEMO) {
+                        // Simulate successful upload and use demo model results
+                        const data = {
+                            success: true,
+                            data_stats: { file_size_mb: (fileSizeMB).toFixed(1), total_transactions: Math.floor(fileSizeMB * 1000), fraud_count: Math.floor(fileSizeMB * 1000 * 0.03), fraud_rate: 0.03 },
+                            model_results: DEMO_DATA.model_results,
+                            analysis_info: { detection_method: 'Demo Universal AI' }
+                        };
+
+                        modelsData = data.model_results;
+                        document.getElementById('dataResults').innerHTML = `
+                            <div class="cyber-panel">
+                                <div class="alert alert-cyber-success">
+                                    <h5><i class="fas fa-check-circle"></i> Dataset Uploaded Successfully! (Demo)</h5>
+                                    <p><strong>File:</strong> ${file.name}</p>
+                                    <p><strong>Size:</strong> ${data.data_stats.file_size_mb} MB</p>
+                                    <p><strong>Total Transactions:</strong> ${data.data_stats.total_transactions.toLocaleString()}</p>
+                                    <p><strong>Fraud Cases:</strong> ${data.data_stats.fraud_count.toLocaleString()}</p>
+                                    <p><strong>Fraud Rate:</strong> ${(data.data_stats.fraud_rate * 100).toFixed(2)}%</p>
+                                    <p><strong>Detection Method:</strong> ${data.analysis_info.detection_method}</p>
+                                </div>
+                                <h5>Model Performance (Demo)</h5>
+                                <div class="row">
+                                    ${Object.entries(data.model_results).map(([model, metrics]) => `
+                                        <div class="col-md-6">
+                                            <div class="model-card">
+                                                <h6>${model}</h6>
+                                                <p><strong>AUC:</strong> ${(metrics.auc * 100).toFixed(1)}%</p>
+                                                <p><strong>Precision:</strong> ${(metrics.precision * 100).toFixed(1)}%</p>
+                                                <p><strong>Recall:</strong> ${(metrics.recall * 100).toFixed(1)}%</p>
+                                                <p><strong>F1-Score:</strong> ${(metrics.f1_score * 100).toFixed(1)}%</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+
+                        updateModelMetrics(data.model_results);
+                        checkModelStatus();
+                        showNotification('success', 'Dataset processed (demo)');
+                    } else {
+                        showError('dataResults', 'Backend server is not running or not accessible. Please start the backend server.');
+                        showNotification('error', 'Backend server connection failed. Please ensure the backend server is running on port 5000.');
+                    }
                 } else {
                     showError('dataResults', `Error: ${error.message}`);
                     showNotification('error', `Upload failed: ${error.message}`);
@@ -980,8 +1116,37 @@
                     showNotification('error', data.message);
                 }
             } catch (error) {
-                showError('predictionResults', `Error: ${error.message}`);
-                showNotification('error', `Prediction failed: ${error.message}`);
+                console.warn('predictFraud failed:', error.message);
+                if (USE_DEMO) {
+                    const data = demoPredict(transactionData, selectedModel);
+                    if (data.success) {
+                        const prediction = data.prediction;
+                        const probability = (prediction.fraud_probability * 100).toFixed(1);
+                        let riskClass = 'low-risk';
+                        let riskIcon = 'fa-shield-alt';
+                        if (prediction.risk_level === 'HIGH') {
+                            riskClass = 'high-risk';
+                            riskIcon = 'fa-exclamation-triangle';
+                        } else if (prediction.risk_level === 'MEDIUM') {
+                            riskClass = 'medium-risk';
+                            riskIcon = 'fa-exclamation-circle';
+                        }
+
+                        document.getElementById('predictionResults').innerHTML = `
+                            <div class="prediction-result ${riskClass}">
+                                <i class="fas ${riskIcon} fa-2x mb-2"></i>
+                                <h5>${prediction.risk_level} RISK</h5>
+                                <p>Fraud Probability: ${probability}%</p>
+                                <p>Model: ${selectedModel} (demo)</p>
+                                <small>Prediction: ${prediction.is_fraud_predicted ? 'FRAUD DETECTED' : 'LEGITIMATE'}</small>
+                            </div>
+                        `;
+                        showNotification(prediction.risk_level === 'HIGH' ? 'error' : 'success', `${prediction.risk_level} risk transaction detected (${probability}%)`);
+                    }
+                } else {
+                    showError('predictionResults', `Error: ${error.message}`);
+                    showNotification('error', `Prediction failed: ${error.message}`);
+                }
             } finally {
                 isPredicting = false;
                 predictBtn.disabled = false;
