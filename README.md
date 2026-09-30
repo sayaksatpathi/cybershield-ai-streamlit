@@ -1,45 +1,52 @@
-# 🛡️ CyberShield AI - Advanced Fraud Detection System
+# 🛡️ CyberShield AI — Fraud Detection System
 
-## 🌐 Live Deployments
+An ML-powered web app that flags fraudulent transactions from uploaded datasets, with an interactive analytics dashboard.
 
-### **Production Applications**
-- **🎯 Streamlit App**: https://cybershield-ai-app-vmbevtd5fcdrjfexcthga5.streamlit.app/
-- **🌐 Netlify Frontend**: https://rad-donut-a8e264.netlify.app/
-- **📖 GitHub Pages**: https://sayaksatpathi.github.io/cybershield-ai-streamlit/
-
-## 🚀 Features
-
-- **Real-time Fraud Detection** using Machine Learning
-- **5 ML Models**: Random Forest, Gradient Boosting, Logistic Regression, SVM, Isolation Forest
-- **Large File Support**: Process datasets up to 1GB
-- **Interactive Web Interface** with cyberpunk design
-- **REST API Backend** for integration
-- **Comprehensive Analytics** and reporting
-
-## 🛠️ Technology Stack
-
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Backend**: Python Flask, Streamlit
-- **ML Libraries**: scikit-learn, pandas, numpy
-- **Deployment**: GitHub Pages, Netlify, Streamlit Cloud
-
-## 📊 Quick Start
-
-1. **Web Interface**: Visit any of the live URLs above
-2. **Upload Data**: Drag & drop CSV files for analysis
-3. **Get Predictions**: Instant fraud detection results
-4. **View Analytics**: Comprehensive reporting dashboard
-
-## 🏆 Achievement Status
-
-- ✅ **Multi-Platform Deployment**: 3 live hosting platforms
-- ✅ **Production Ready**: Enterprise-grade fraud detection
-- ✅ **Global Access**: Worldwide availability with HTTPS
-- ✅ **Auto-Deploy**: CI/CD pipeline with GitHub Actions
-- ✅ **Professional Grade**: Complete documentation and UI
+**🔗 Live:** https://cybershield-ai-app-vmbevtd5fcdrjfexcthga5.streamlit.app/
 
 ---
 
-**Developed by Sayak Satpathi** | **CyberShield AI v2.1.0** | **© 2025**
+## Overview
 
-⭐ **Star this repository if you find it helpful-la README.md*
+Upload a transaction dataset (CSV) and CyberShield runs it through an ensemble of classic ML models to surface likely fraud, then presents results and analytics in a web dashboard. Built to make fraud screening approachable for non-technical users.
+
+## Features
+
+- **5-model ensemble** — Random Forest, Gradient Boosting, Logistic Regression, SVM, Isolation Forest.
+- **CSV upload & scoring** — drag-and-drop datasets (large-file support).
+- **Analytics dashboard** — result breakdowns and reporting.
+- **Web interface** — Streamlit front end, deployed on Streamlit Community Cloud.
+
+## Tech Stack
+
+| Layer | Tools |
+|------|-------|
+| ML | scikit-learn (Random Forest, Gradient Boosting, Logistic Regression, SVM, Isolation Forest), pandas, NumPy |
+| App | Streamlit (primary), Flask (API backend) |
+| Deploy | Streamlit Community Cloud |
+
+## Quick Start
+
+```bash
+git clone https://github.com/sayaksatpathi/cybershield-ai-streamlit.git
+cd cybershield-ai-streamlit
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+## How it works
+
+1. Upload a transaction CSV.
+2. Each model scores the rows; the ensemble aggregates the signals.
+3. The dashboard shows flagged transactions and summary analytics.
+
+## Roadmap / Honest Notes
+
+- Add labelled benchmark results (precision/recall on a held-out set) so accuracy claims are reproducible.
+- Add model-explainability (feature importance / SHAP) for flagged transactions.
+- Containerize for one-command deployment.
+
+---
+
+**Developed by Sayak Satpathi.**
