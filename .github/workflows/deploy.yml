@@ -29,32 +29,39 @@ jobs:
   deploy:
     name: Deploy (Render or Railway)
     needs: test
-    # Only run deploy job when at least one deployment secret is present
-    if: ${{ secrets.RENDER_API_KEY != '' || secrets.RAILWAY_API_KEY != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Skip deployment when no credentials are configured
+        if: ${{ env.RENDER_API_KEY == '' && env.RAILWAY_API_KEY == '' }}
+        run: echo "No Render or Railway deployment credentials configured. Skipping deploy steps."
       # Render deploy using a pinned marketplace action for reliability
       - name: Deploy to Render (official action)
-        if: ${{ secrets.RENDER_API_KEY != '' && secrets.RENDER_SERVICE_ID != '' }}
+        if: ${{ env.RENDER_API_KEY != '' && env.RENDER_SERVICE_ID != '' }}
         uses: JorgeLNJunior/render-deploy@v1.4.5
         with:
-          service_id: ${{ secrets.RENDER_SERVICE_ID }}
-          api_key: ${{ secrets.RENDER_API_KEY }}
+          service_id: ${{ env.RENDER_SERVICE_ID }}
+          api_key: ${{ env.RENDER_API_KEY }}
           wait_deploy: true
 
       # Railway deploy using official Railway Action. Requires RAILWAY_API_KEY; optionally RAILWAY_PROJECT_ID & RAILWAY_ENVIRONMENT_ID
       - name: Deploy to Railway (pinned official action)
-        if: ${{ secrets.RAILWAY_API_KEY != '' }}
+        if: ${{ env.RAILWAY_API_KEY != '' }}
         uses: railwayapp/railway-action@v0.2.0
         with:
-          railwayToken: ${{ secrets.RAILWAY_API_KEY }}
-          projectId: ${{ secrets.RAILWAY_PROJECT_ID || '' }}
-          environmentId: ${{ secrets.RAILWAY_ENVIRONMENT_ID || '' }}
+          railwayToken: ${{ env.RAILWAY_API_KEY }}
+          projectId: ${{ env.RAILWAY_PROJECT_ID || '' }}
+          environmentId: ${{ env.RAILWAY_ENVIRONMENT_ID || '' }}
           command: up
         env:
-          RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
+          RAILWAY_API_KEY: ${{ env.RAILWAY_API_KEY }}
